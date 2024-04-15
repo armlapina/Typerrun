@@ -10,7 +10,6 @@
 ### Архитектура
 Проект будет разделен на следующие классы и функции:
 - ExerciseGenerator: Класс для генерации заданий по печати. Методы: generate_exercise(), load_exercises_from_file().
-- TypingTrainer: Класс для тренировки печати вслепую. Методы: start_typing_session(), check_input().
+- TypingTrainer: Класс для тренировки печати вслепую. Методы: start_typing_session(), calculate_speed().
 - StatisticsTracker: Класс для отслеживания статистики. Методы: track_errors(), calculate_speed().
-- FileLoader: Класс для загрузки заданий из файлов. Методы: load_file(), parse_exercises().
-- UserInterface: Класс для отображения интерфейса тренажера. Методы: display_exercise(), show_statistics().
+- UserInterface: Класс для отображения интерфейса тренажера. Находится в main.py. Методы: show_message(), choose_exercise_type(), show_statistics(), show_main_menu(), start_session_random(), start_session_file(), show_typing_interface(), check_input(), 
