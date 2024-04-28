@@ -1,18 +1,17 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import time
-from typing_trainer import TypingTrainer
 from statistics_tracker import StatisticsTracker
 from exercise_generator import ExerciseGenerator
 
 
 class TypingInterface:
     def __init__(self):
+        self.exercise_generator = ExerciseGenerator()
         self.root = tk.Tk()
         self.root.title("Typing Trainer")
         self.root.geometry("800x800")
         self.statistics_tracker = StatisticsTracker()
-        self.typing_trainer = TypingTrainer(ExerciseGenerator(), self.statistics_tracker)
 
         self.exercise_label = tk.Label(self.root, text="")
         self.exercise_label.pack()
@@ -49,9 +48,9 @@ class TypingInterface:
         self.input_entry.delete(0, tk.END)
 
     def show_main_menu(self):
-        self.statistics_tracker.end_time = time.time()
-        if self.statistics_tracker.start_time != 0:
-            self.statistics_tracker.time = self.statistics_tracker.end_time - self.statistics_tracker.start_time
+        if self.statistics_tracker.end_time <= self.statistics_tracker.start_time:
+            self.statistics_tracker.end_time = time.time()
+        self.statistics_tracker.time = self.statistics_tracker.end_time - self.statistics_tracker.start_time
         self.random_button.pack_forget()
         self.file_button.pack_forget()
         self.back_button.pack_forget()
@@ -64,7 +63,7 @@ class TypingInterface:
         self.statistics_tracker.end_time = time.time()
         self.statistics_tracker.time = self.statistics_tracker.end_time - self.statistics_tracker.start_time
         self.statistics_tracker.start_time = time.time()
-        self.typing_trainer.start_typing_session()
+        self.statistics_tracker.start_typing_session(self.exercise_generator)
         self.show_typing_interface()
 
     def start_session_file(self):
@@ -75,18 +74,18 @@ class TypingInterface:
         if file_path:
             with open(file_path, 'r') as file:
                 file_text = file.read()
-            self.typing_trainer.current_exercise = file_text
+            self.statistics_tracker.current_exercise = file_text
             self.show_typing_interface()
 
     def show_typing_interface(self):
-        self.exercise_label.config(text=self.typing_trainer.current_exercise)
+        self.exercise_label.config(text=self.statistics_tracker.current_exercise)
         self.input_entry.bind("<Key>", lambda event: self.check_input(event) or "break")
         self.statistics_tracker.start_time = time.time()
 
     def check_input(self, event):
         if event.keycode == 22:  # Backspace key
-            if len(self.typing_trainer.user_input) > 0:
-                self.typing_trainer.user_input = self.typing_trainer.user_input[0:-1]
+            if len(self.statistics_tracker.user_input) > 0:
+                self.statistics_tracker.user_input = self.statistics_tracker.user_input[0:-1]
             return True
         if event.keycode in [50, 114, 111, 113, 116, 37]:  # Ignore Shift key
             return True
@@ -94,25 +93,25 @@ class TypingInterface:
             input_char = " "
         else:
             input_char = event.char
-        exercise_text = self.typing_trainer.current_exercise
-        if input_char == exercise_text[len(self.typing_trainer.user_input)]:
-            self.typing_trainer.user_input += input_char
-            if self.typing_trainer.user_input == exercise_text:
+        exercise_text = self.statistics_tracker.current_exercise
+        if input_char == exercise_text[len(self.statistics_tracker.user_input)]:
+            self.statistics_tracker.user_input += input_char
+            if self.statistics_tracker.user_input == exercise_text:
                 self.exercise_label.config(text="")
                 messagebox.showinfo("Success", "Typing completed successfully!")
                 self.choose_exercise_type()
                 return False
             return True
         else:
-            self.typing_trainer.error_count += 1
+            self.statistics_tracker.error_count += 1
             return False
 
     def show_statistics(self):
         avg_mistakes = 0
-        if len(self.typing_trainer.current_exercise) > 0:
-            avg_mistakes = self.statistics_tracker.error_count / len(self.typing_trainer.current_exercise)
-        best_wpm = self.statistics_tracker.calculate_speed(time.time() - self.statistics_tracker.start_time,
-                                                           self.typing_trainer.current_exercise)
+        if len(self.statistics_tracker.current_exercise) > 0:
+            avg_mistakes = self.statistics_tracker.error_count / len(self.statistics_tracker.current_exercise)
+        best_wpm = self.statistics_tracker.calculate_speed(self.statistics_tracker.time,
+                                                           self.statistics_tracker.current_exercise)
         messagebox.showinfo("Statistics", f"Average Mistakes: {avg_mistakes}\nBest WPM: {best_wpm}")
 
 
